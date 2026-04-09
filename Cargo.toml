@@ -1,0 +1,50 @@
+[workspace]
+members = ["xtask"]
+
+[package]
+name = "hardwave-spotlight"
+version = "0.1.0"
+edition = "2021"
+license = "Proprietary"
+description = "Hardwave Spotlight — AI-driven concert lightshow generator VST3/CLAP plugin by Hardwave Studios"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+default = ["gui"]
+gui = ["dep:wry"]
+
+[dependencies]
+# ── nih-plug (VST3 / CLAP framework) ─────────────────────────────────────────
+nih_plug = { git = "https://github.com/Dishairano/nih-plug-hardwave.git", branch = "main" }
+
+# ── GUI: wry WebView ─────────────────────────────────────────────────────────
+wry = { version = "0.46", optional = true }
+
+# ── Serialisation ─────────────────────────────────────────────────────────────
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# ── Concurrency & atomics ────────────────────────────────────────────────────
+crossbeam-channel = "0.5"
+parking_lot = "0.12"
+
+# ── FFT ──────────────────────────────────────────────────────────────────────
+rustfft = "6.2"
+
+# ── Auth token storage ───────────────────────────────────────────────────────
+dirs = "5"
+
+# ── raw-window-handle bridge ─────────────────────────────────────────────────
+raw-window-handle = "0.6"
+
+# ── Linux GTK ────────────────────────────────────────────────────────────────
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "0.18"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.52", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Input_KeyboardAndMouse"] }
+
+[profile.release]
+lto = "thin"
