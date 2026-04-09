@@ -17,8 +17,10 @@ use crate::params::SpotlightParams;
 use crate::protocol::SpotlightPacket;
 
 const SPOTLIGHT_URL: &str = "https://spotlight.hardwavestudios.com/vst/spotlight";
+// Logical (unscaled) editor dimensions. nih_plug applies the DAW's DPI scale
+// factor on top of these — do NOT multiply by `scale_factor` ourselves.
 const EDITOR_WIDTH: u32 = 1280;
-const EDITOR_HEIGHT: u32 = 800;
+const EDITOR_HEIGHT: u32 = 720;
 const MIN_WIDTH: u32 = 800;
 const MIN_HEIGHT: u32 = 500;
 const MAX_WIDTH: u32 = 2560;
@@ -271,10 +273,11 @@ impl SpotlightEditor {
         }
     }
 
-    fn scaled_size(&self) -> (u32, u32) {
-        let (w, h) = *self.editor_size.lock();
-        let f = *self.scale_factor.lock();
-        ((w as f32 * f) as u32, (h as f32 * f) as u32)
+    /// Returns the editor's *logical* (unscaled) size. nih_plug + the host apply
+    /// the DPI scale factor automatically; we must NOT pre-scale or wry will
+    /// then scale a second time and the window blows up to dpi^2 times intended.
+    fn logical_size(&self) -> (u32, u32) {
+        *self.editor_size.lock()
     }
 }
 
@@ -285,7 +288,7 @@ impl Editor for SpotlightEditor {
         context: Arc<dyn GuiContext>,
     ) -> Box<dyn std::any::Any + Send> {
         let packet_rx = Arc::clone(&self.packet_rx);
-        let (width, height) = self.scaled_size();
+        let (width, height) = self.logical_size();
 
         let version = env!("CARGO_PKG_VERSION");
         let url = match &self.auth_token {
@@ -315,7 +318,7 @@ impl Editor for SpotlightEditor {
     }
 
     fn size(&self) -> (u32, u32) {
-        self.scaled_size()
+        self.logical_size()
     }
 
     fn set_scale_factor(&self, factor: f32) -> bool {

@@ -3,7 +3,7 @@ members = ["xtask"]
 
 [package]
 name = "hardwave-spotlight"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "Proprietary"
 description = "Hardwave Spotlight — AI-driven concert lightshow generator VST3/CLAP plugin by Hardwave Studios"
