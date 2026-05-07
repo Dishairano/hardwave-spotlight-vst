@@ -322,7 +322,10 @@ impl Editor for SpotlightEditor {
     }
 
     fn set_scale_factor(&self, factor: f32) -> bool {
-        *self.scale_factor.lock() = factor;
+        // Clamp host-supplied DPI scale to a sane range so a misbehaving
+        // host can't shrink the editor to zero pixels.
+        let clamped = factor.clamp(0.5, 4.0);
+        *self.scale_factor.lock() = clamped;
         true
     }
 
@@ -467,6 +470,9 @@ fn spawn_windows(
         })
         .with_transparent(false)
         .with_devtools(false)
+        // Disable WebView2 browser accelerator keys (Ctrl+P / Ctrl+S /
+        // Ctrl+R / F5 / F12 / Ctrl+Shift+I) at the OS level.
+        .with_browser_accelerator_keys(false)
         .with_background_color((10, 10, 11, 255))
         .build(&wrapper)
         .ok();
@@ -525,6 +531,7 @@ fn spawn_unix(
                 position: wry::dpi::Position::Logical(wry::dpi::LogicalPosition::new(0.0, 0.0)),
                 size: wry::dpi::Size::Logical(wry::dpi::LogicalSize::new(width as f64, height as f64)),
             })
+            .with_devtools(false)
             .build_as_child(&wrapper)
         {
             Ok(wv) => wv,
