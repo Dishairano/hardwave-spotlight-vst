@@ -11,6 +11,7 @@ use std::num::NonZeroU32;
 use std::sync::Arc;
 
 mod auth;
+mod crash_reporter;
 mod dsp;
 mod editor;
 mod params;
@@ -100,6 +101,7 @@ impl Plugin for HardwaveSpotlight {
         buffer_config: &BufferConfig,
         _context: &mut impl InitContext<Self>,
     ) -> bool {
+        crash_reporter::install("spotlight");
         let sr = buffer_config.sample_rate;
         self.sample_rate = sr;
         self.analyzer.set_sample_rate(sr);
