@@ -167,8 +167,8 @@ jobs:
           tag_name: ${{ steps.version.outputs.version }}
           name: Hardwave Spotlight ${{ steps.version.outputs.version }}
           draft: false
-          prerelease: false
-          make_latest: true
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          make_latest: ${{ !contains(steps.version.outputs.version, '-') }}
           generate_release_notes: true
           files: |
             artifacts/hardwave-spotlight-linux-x64/*.zip
